@@ -242,10 +242,10 @@ def recommend_books(user_ids_df, content_df, predicted_genre, top_n=3, choice="o
         print("Invalid choice. No recommendations provided.")
 
 # Full workflow to extract text, predict genre, and recommend books
-def extract_predict_recommend(title_ocr, user_ids_df, content_df, top_n=3):
+def extract_predict_recommend(title_ocr, user_ids_df, content_df, top_n=3, choice="only_genre"):
     predicted_genre = predict_genre_book(title_ocr)
     if predicted_genre:
       print(f"\nPredicted Genre: {predicted_genre}")
-      recommend_books(user_ids_df, content_df, predicted_genre, top_n)
+      recommend_books(user_ids_df, content_df, predicted_genre, top_n, choice)
     else:
       print("Failed to predict the genre.")
