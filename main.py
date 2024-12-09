@@ -1,11 +1,13 @@
-from flask import Flask, request, jsonify
-import os
-from PIL import Image
 import io
+import pytesseract
+import pandas as pd
+from flask import Flask, request, jsonify
+from PIL import Image
+from feature import fitur1_ML, fitur2_ml
 from fitur1_ML import predict as predict_books
 from fitur2_ml import predict_genre_book, recommend_books
-import pytesseract
-content_df="./content_df.csv"
+
+content_df = pd.read_csv("./data/content_df.csv")
 app = Flask(__name__)
 
 @app.route("/", methods=["GET"])

@@ -5,8 +5,10 @@ seaborn==0.12.2
 scikit-learn==1.4.0
 scipy==1.11.3
 tensorflow==2.15.0
-keras==3.5.0
 opencv-python==4.10.0.84
 requests==2.31.0
 flask==3.0.3
-sqlalchemy==2.1.0
+sqlalchemy
+tensorflow_recommenders
+tf_keras
+pytesseract
