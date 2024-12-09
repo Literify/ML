@@ -249,7 +249,3 @@ def extract_predict_recommend(title_ocr, user_ids_df, content_df, top_n=3):
       recommend_books(user_ids_df, content_df, predicted_genre, top_n)
     else:
       print("Failed to predict the genre.")
-# Example usage
-image_path = '/content/book-covers-big-2019101610.jpg' # Please input your image path
-title_ocr = extract_text_from_image(image_path)
-extract_predict_recommend(title_ocr, user_ids_df, content_df, top_n=3)
