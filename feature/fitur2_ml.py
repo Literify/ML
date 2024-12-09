@@ -213,10 +213,8 @@ def predict_rating(user, book):
 """## OCR"""
 
 def extract_text_from_image(image_path):
-    try:
         # Open the image
         img = Image.open(image_path)
-
         # Extract text using Tesseract
         extracted_text = pytesseract.image_to_string(img)
 
@@ -226,61 +224,32 @@ def extract_text_from_image(image_path):
         # Display the extracted text
         print("Extracted text from the image:")
         print(preprocessed_text)
-
-        # Ask the user if the result is correct
-        is_correct = input("\nIs the extracted text correct? (yes/no): ").strip().lower()
-
-        # If incorrect, allow manual input
-        if is_correct == 'no':
-            preprocessed_text = input("Please enter the text manually: ").strip()
-
-        # Return the final text
         return preprocessed_text
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return None
-
-"""## Full Function"""
-
 # Function to recommend books based on user input
-def recommend_books(user_ids_df, content_df, predicted_genre, top_n=3):
-    # Ask the user for their preference
-    choice = input(
-        "\nWould you like book recommendations?\n"
-        "1. Based only on this genre\n"
-        "2. Based on this and other genres\n"
-        "3. I don't want recommendations\n"
-        "Enter your choice (1/2/3): "
-    ).strip()
+def recommend_books(user_ids_df, content_df, predicted_genre, top_n=3, choice="only_genre"):
     user = random.choice(user_ids_df['user_id'].tolist())
-    if choice == "1":
+    if choice == "only_genre":
         # Filter books only by the predicted genre
         content_df = content_df[content_df['genre'] == predicted_genre].drop_duplicates()
         predict_book_recomendation(user, content_df, top_n=3)
-    elif choice == "2":
+    elif choice == "all_genre":
         # Recommend books from all genres, including the predicted one
         content_df = content_df.drop_duplicates()
         predict_book_recomendation(user, content_df, top_n=3)
-    elif choice == "3":
+    elif choice == "no_genre":
         print("No recommendations will be provided. Thank you!")
     else:
         print("Invalid choice. No recommendations provided.")
 
 # Full workflow to extract text, predict genre, and recommend books
-def extract_predict_recommend(image_path, user_ids_df, content_df, top_n=3):
-    text = extract_text_from_image(image_path)
-    if text:
-        predicted_genre = predict_genre_book(text)
-        if predicted_genre:
-            print(f"\nPredicted Genre: {predicted_genre}")
-            recommend_books(user_ids_df, content_df, predicted_genre, top_n)
-        else:
-            print("Failed to predict the genre.")
+def extract_predict_recommend(title_ocr, user_ids_df, content_df, top_n=3):
+    predicted_genre = predict_genre_book(title_ocr)
+    if predicted_genre:
+      print(f"\nPredicted Genre: {predicted_genre}")
+      recommend_books(user_ids_df, content_df, predicted_genre, top_n)
     else:
-        print("Failed to extract text from the image.")
-
+      print("Failed to predict the genre.")
 # Example usage
-image_path = '4099.jpg' # Please input your image path
-extract_predict_recommend(image_path, user_ids_df, content_df, top_n=3)
-
+image_path = '/content/book-covers-big-2019101610.jpg' # Please input your image path
+title_ocr = extract_text_from_image(image_path)
+extract_predict_recommend(title_ocr, user_ids_df, content_df, top_n=3)
