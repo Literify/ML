@@ -1,30 +1,18 @@
 import os
 import pickle
-from typing import Dict, Text
-import ipywidgets as widgets
 import random
 import numpy as np
-from IPython.display import display, HTML
 import pandas as pd
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.model_selection import train_test_split
 import tensorflow as tf
-from tensorflow.keras.preprocessing.text import tokenizer_from_json
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Embedding, Flatten, Concatenate, Dense
-from tensorflow.keras.optimizers import Adam
-import regex as re
-import string
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-os.environ['TF_USE_LEGACY_KERAS'] = '1'
 import tensorflow_recommenders as tfrs
-from PIL import Image
 import pytesseract
+from PIL import Image
 
-sampled_categories = pd.read_csv('sampled_categories.csv')
-content_df = pd.read_csv('content_df.csv')
-user_ids_df = pd.read_csv('user_ids.csv')
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
+
+sampled_categories = pd.read_csv('data/sampled_categories.csv')
+content_df = pd.read_csv('data/content_df.csv')
+user_ids_df = pd.read_csv('data/user_ids.csv')
 
 """# Fitur 2: Predict Book Genre and Give Recomendation
 
@@ -35,7 +23,7 @@ user_ids_df = pd.read_csv('user_ids.csv')
 TRAINING_SIZE = 20000
 
 # Vocabulary size of the tokenizer
-VOCAB_SIZE = 41509
+VOCAB_SIZE = 10000
 
 # Maximum length of the padded sequences
 MAX_LENGTH = 32
@@ -47,22 +35,23 @@ PADDING_TYPE = 'pre'
 TRUNC_TYPE = 'post'
 
 # Parameters
-EMBEDDING_DIM = 32
-MAX_LENGTH = 32
-VOCAB_SIZE = 41509
+EMBEDDING_DIM = 16
+LSTM_DIM = 32
+DENSE_DIM = 24
 
 # Model definition with LSTM
 model_lstm = tf.keras.Sequential([
     tf.keras.Input(shape=(MAX_LENGTH,)),
-    tf.keras.layers.Embedding(VOCAB_SIZE, EMBEDDING_DIM),
-    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64)),
-    tf.keras.layers.Dense(10, activation="softmax", kernel_regularizer=tf.keras.regularizers.l2(0.01), name='output_layer')
+    tf.keras.layers.Embedding(input_dim=VOCAB_SIZE, output_dim=EMBEDDING_DIM),
+    tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(LSTM_DIM)),
+    tf.keras.layers.Dense(DENSE_DIM, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
 ])
 
 # Load the model weights (this assumes the model is already defined)
-model_lstm.load_weights('model_genre_classification_weights.h5')
+model_lstm.load_weights('model/model_genre_classification_weights.h5')
 
-with open('label_encoder.pkl', 'rb') as file:
+with open('model/label_encoder.pkl', 'rb') as file:
     label_encoder = pickle.load(file)
 
 def remove_stopwords(sentence):
@@ -84,7 +73,7 @@ def remove_stopwords(sentence):
     return sentence
 
 # Load the saved vocabulary
-with open('vectorizer_vocab.pkl', 'rb') as file:
+with open('model/vectorizer_vocab.pkl', 'rb') as file:
     vocabulary = pickle.load(file)
 
 # Recreate the TextVectorization layer using the loaded vocabulary
@@ -192,7 +181,7 @@ dummy_features = {
 }
 _ = model(dummy_features)  # This builds the model
 
-model.load_weights('model_recomendation_weights.h5')
+model.load_weights('model/model_recomendation_weights.h5')
 
 def predict_book_recomendation(user, filtered_books_df, top_n=3):
     books = tf.data.Dataset.from_tensor_slices(dict(filtered_books_df[['book_title']]))
