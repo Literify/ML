@@ -6,7 +6,7 @@ content_df = pd.read_csv('data/content_df.csv')
 user_ids_df = pd.read_csv('data/user_ids.csv')
 
 
-def predict(title, data, cos_sim, similarity_weight=0.7, top_n=10):
+def predict(title, data, cos_sim, similarity_weight=0.7, top_n=3):
     index_movie = data[data['book_title'] == title].index
     similarity = cos_sim[index_movie].T
 
@@ -23,7 +23,5 @@ def predict(title, data, cos_sim, similarity_weight=0.7, top_n=10):
 cos_sim = pickle.load(open('model/cosine_similarity.pkl', 'rb'))
 # Convert the cosine similarity matrix to a dense format
 cos_sim_dense = cos_sim.toarray()
-predict("It's Not All Song and Dance: A Life Behind the Scenes in the Performing Arts", content_df, cos_sim_dense, similarity_weight=0.7, top_n=3)
-
 
 
