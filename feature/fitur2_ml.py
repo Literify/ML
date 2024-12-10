@@ -4,11 +4,12 @@ import random
 import numpy as np
 import pandas as pd
 import tensorflow as tf
-import tensorflow_recommenders as tfrs
 import pytesseract
 from PIL import Image
 
 os.environ['TF_USE_LEGACY_KERAS'] = '1'
+
+import tensorflow_recommenders as tfrs
 
 ## Text Classification
 def load_and_predict_genre(text, model_weights_path, vectorizer_vocab_path, label_encoder_path):
@@ -75,8 +76,8 @@ def load_and_predict_genre(text, model_weights_path, vectorizer_vocab_path, labe
     predicted_genre_index = np.argmax(genre_probabilities, axis=1)[0]
     predicted_genre = label_encoder.inverse_transform([predicted_genre_index])[0]
 
-    return predicted_genre    
-
+    return predicted_genre
+    
 ## Recomendation System
 def predict_book_recommendation(user, filtered_books_df, unique_book_titles, unique_user_ids, model_weights_path, top_n=3):
     # Load and preprocess data
@@ -157,9 +158,27 @@ def predict_book_recommendation(user, filtered_books_df, unique_book_titles, uni
     # Filter and return details of the recommended books
     recommendations = filtered_books_df[filtered_books_df['book_title'].isin(recommended_titles)]
     return recommendations.to_dict(orient="records")
+def recommend_books(user_ids_df, content_df, predicted_genre, unique_book_titles, unique_user_ids, model_weights_path, top_n=3, choice="only_genre"):
+    user = random.choice(user_ids_df['user_id'].tolist())
+    if choice == "only_genre":
+        # Filter books only by the predicted genre
+        content_df = content_df[content_df['genre'] == predicted_genre].drop_duplicates()
+        recommendations = predict_book_recommendation(user=user, filtered_books_df=content_df, unique_book_titles=unique_book_titles,
+                                                      unique_user_ids=unique_user_ids, model_weights_path=model_weights_path,
+                                                      top_n=3)
+        return recommendations
+    elif choice == "all_genre":
+        # Recommend books from all genres, including the predicted one
+        content_df = content_df.drop_duplicates()
+        recommendations = predict_book_recommendation(user=user, filtered_books_df=content_df, unique_book_titles=unique_book_titles,
+                                                      unique_user_ids=unique_user_ids, model_weights_path=model_weights_path,
+                                                      top_n=3)
+        return recommendations
+    elif choice == "no_genre":
+        print("No recommendations will be provided. Thank you!")
+        return None
 
-"""## OCR"""
-
+## OCR
 def extract_text_from_image(image_path):
         # Open the image
         img = Image.open(image_path)
@@ -170,30 +189,6 @@ def extract_text_from_image(image_path):
         preprocessed_text = ' '.join(extracted_text.split())
 
         # Display the extracted text
-        print("Extracted text from the image:")
-        print(preprocessed_text)
+        # print("Extracted text from the image:")
+        # print(preprocessed_text)
         return preprocessed_text
-# Function to recommend books based on user input
-def recommend_books(user_ids_df, content_df, predicted_genre, top_n=3, choice="only_genre"):
-    user = random.choice(user_ids_df['user_id'].tolist())
-    if choice == "only_genre":
-        # Filter books only by the predicted genre
-        content_df = content_df[content_df['genre'] == predicted_genre].drop_duplicates()
-        predict_book_recomendation(user, content_df, top_n=3)
-    elif choice == "all_genre":
-        # Recommend books from all genres, including the predicted one
-        content_df = content_df.drop_duplicates()
-        predict_book_recomendation(user, content_df, top_n=3)
-    elif choice == "no_genre":
-        print("No recommendations will be provided. Thank you!")
-    else:
-        print("Invalid choice. No recommendations provided.")
-
-# Full workflow to extract text, predict genre, and recommend books
-def extract_predict_recommend(title_ocr, user_ids_df, content_df, top_n=3, choice="only_genre"):
-    predicted_genre = predict_genre_book(title_ocr)
-    if predicted_genre:
-      print(f"\nPredicted Genre: {predicted_genre}")
-      recommend_books(user_ids_df, content_df, predicted_genre, top_n, choice)
-    else:
-      print("Failed to predict the genre.")
