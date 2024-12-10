@@ -79,11 +79,8 @@ def predict_genre():
         if response.status_code != 200:
             return jsonify({"error": "Failed to retrieve the image from the URL"}), 400
         
-        # Open the file as an image
-        image = Image.open(io.BytesIO(file.read()))
-        
-        # Process the image and extract text
-        text = pytesseract.image_to_string(image)
+        # Extract text from the image using Tesseract
+        extracted_text = pytesseract.image_to_string(Image.open(io.BytesIO(response.content)))
         preprocessed_text = ' '.join(extracted_text.split())
         
         # Predict genre using fitur2_ml
