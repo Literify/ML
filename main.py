@@ -70,7 +70,7 @@ def recommend_book_fitur_1():
 def predict_genre():
     try:
         # Ensure a file is uploaded
-        image_url = request.json.get("image_url")
+        image_path = request.json.get("image_url")
         if not image_path:
             return jsonify({"error": "No image URL provided"}), 400
         
