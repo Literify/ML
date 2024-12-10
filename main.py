@@ -70,9 +70,13 @@ def recommend_book_fitur_1():
 def predict_genre():
     try:
         # Ensure a file is uploaded
-        file = request.files.get("file")
-        if not file:
-            return jsonify({"error": "No file uploaded"}), 400
+        if not image_url:
+            return jsonify({"error": "No image URL provided"}), 400
+        
+        # Download the image from the URL
+        response = requests.get(image_url)
+        if response.status_code != 200:
+            return jsonify({"error": "Failed to retrieve the image from the URL"}), 400
         
         # Open the file as an image
         image = Image.open(io.BytesIO(file.read()))
