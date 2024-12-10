@@ -1,12 +1,4 @@
-import pickle
-import pandas as pd
-
-sampled_categories = pd.read_csv('data/sampled_categories.csv')
-content_df = pd.read_csv('data/content_df.csv')
-user_ids_df = pd.read_csv('data/user_ids.csv')
-
-
-def predict(title, data, cos_sim, similarity_weight=0.7, top_n=3):
+def predict(title, data, cos_sim, similarity_weight=0.7, top_n=10):
     index_movie = data[data['book_title'] == title].index
     similarity = cos_sim[index_movie].T
 
@@ -17,11 +9,14 @@ def predict(title, data, cos_sim, similarity_weight=0.7, top_n=3):
 
     final_df_sorted = final_df.sort_values(by='final_score', ascending=False).head(top_n)
     final_df_sorted_show = final_df_sorted[['book_title', 'description', 'authors', 'genre', 'publisher', 'Price', 'image', 'previewLink', 'infoLink']]
-    return print(final_df_sorted_show.to_json(orient='records', lines=False))
+    
+    selected_title = final_df[final_df['book_title'] == title][['book_title', 'description', 'authors', 'genre', 'publisher', 'Price', 'image', 'previewLink', 'infoLink']].to_dict(orient='records')[0]
 
-# Load the cosine similarity matrix from pickle
-cos_sim = pickle.load(open('model/cosine_similarity.pkl', 'rb'))
-# Convert the cosine similarity matrix to a dense format
-cos_sim_dense = cos_sim.toarray()
+    recommendations = final_df_sorted_show.to_dict(orient='records')
 
+    output = {
+        "selected_title": selected_title,
+        "recommendations": recommendations
+    }
 
+    return output
