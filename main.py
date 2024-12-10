@@ -3,6 +3,8 @@ import io
 import pytesseract
 import pandas as pd
 import pickle
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 from flask import Flask, request, jsonify
 from PIL import Image
 from feature import fitur1_ML, fitur2_ml
