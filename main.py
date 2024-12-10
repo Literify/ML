@@ -36,7 +36,7 @@ cos_sim = pickle.load(open('./model/cosine_similarity.pkl', 'rb'))
 cos_sim_dense = cos_sim.toarray()
 model_weights_path = './model/model_genre_classification_weights.h5'
 vectorizer_vocab_path = '/content/model/vectorizer_vocab.pkl'
-label_encoder_path = "./model//label_encoder.pkl"
+label_encoder_path = "./model/label_encoder.pkl"
 model_weights_path = './model/model_recomendation_weights.h5'
 
 app = Flask(__name__)
