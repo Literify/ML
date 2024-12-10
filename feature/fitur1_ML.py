@@ -1,3 +1,6 @@
+import pandas as pd
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 def predict(title, data, cos_sim, similarity_weight=0.7, top_n=10):
     index_movie = data[data['book_title'] == title].index
     similarity = cos_sim[index_movie].T
