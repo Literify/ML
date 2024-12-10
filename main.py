@@ -14,13 +14,30 @@ from fitur2_ml import predict_genre_book, recommend_books
 # Import Data
 content_df = pd.read_csv("./data/content_df.csv")
 sampled_categories = pd.read_csv('./data/sampled_categories.csv')
+sampled_categories = sampled_categories.rename(columns={'review/score': 'user_rating', 'User_id': 'user_id', 'Title': 'book_title'})
 user_ids_df = pd.read_csv('./data/user_ids.csv')
 
+unique_books_df = sampled_categories[['book_title']].drop_duplicates()
+ratings = tf.data.Dataset.from_tensor_slices(dict(sampled_categories[['user_id', 'book_title', 'user_rating']]))
+books = tf.data.Dataset.from_tensor_slices(dict(unique_books_df[['book_title']]))
+ratings = ratings.map(lambda x: {
+    "book_title": x["book_title"],
+    "user_id": x["user_id"],
+    "rating": float(x["user_rating"])
+})
+books = books.map(lambda x: x["book_title"])
+book_titles = books.batch(1_000)
+user_ids = ratings.batch(1_000).map(lambda x: x["user_id"])
+unique_book_titles = np.unique(np.concatenate(list(book_titles)))
+unique_user_ids = np.unique(np.concatenate(list(user_ids)))
+
 # Import Model
-# Load the cosine similarity matrix from pickle
 cos_sim = pickle.load(open('./model/cosine_similarity.pkl', 'rb'))
-# Convert the cosine similarity matrix to a dense format
 cos_sim_dense = cos_sim.toarray()
+model_weights_path = './model/model_genre_classification_weights.h5'
+vectorizer_vocab_path = '/content/model/vectorizer_vocab.pkl'
+label_encoder_path = "./model//label_encoder.pkl"
+model_weights_path = './model/model_recomendation_weights.h5'
 
 app = Flask(__name__)
 
