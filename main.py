@@ -1,15 +1,21 @@
 # Import Library
 import io
-import pytesseract
 import pandas as pd
 import pickle
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from flask import Flask, request, jsonify
-from PIL import Image
 from feature import fitur1_ML, fitur2_ml
+import os
+import random
+import pytesseract
+from PIL import Image
 from fitur1_ML import predict as predict_books_1
-from fitur2_ml import predict_genre_book, recommend_books
+from fitur2_ml import load_and_predict_genre, recommend_books, extract_text_from_image
+
+os.environ['TF_USE_LEGACY_KERAS'] = '1'
+
+import tensorflow_recommenders as tfrs
 
 # Import Data
 content_df = pd.read_csv("./data/content_df.csv")
@@ -49,7 +55,7 @@ def home():
 def recommend_book_fitur_1():
     try:
         # Get the title from the JSON request
-        title = request.files.get("title")
+        title = request.json.get("title")
         if not title:
             return jsonify({"error": "Title is required"}), 400
         
@@ -73,47 +79,33 @@ def predict_genre():
         
         # Process the image and extract text
         text = pytesseract.image_to_string(image)
+        preprocessed_text = ' '.join(extracted_text.split())
         
         # Predict genre using fitur2_ml
-        genre = predict_genre_book(text)
+        predicted_genre = load_and_predict_genre(preprocessed_text,
+                                                 model_weights_path=model_weights_path,
+                                                 vectorizer_vocab_path=vectorizer_vocab_path,
+                                                 label_encoder_path=label_encoder_path) 
         
-        return jsonify({"extracted_text": text, "predicted_genre": genre})
+        return jsonify({"extracted_text": preprocessed_text, "predicted_genre": predicted_genre})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route("/recommend-books", methods=["POST"])
-def recommend():
+@app.route("/recommend-books-fitur-2", methods=["POST"])
+def recommend_books_fitur_2():
     try:
-        user_id = request.json.get("user_id")
-        genre = request.json.get("genre")
-        if not user_id or not genre:
-            return jsonify({"error": "Missing user_id or genre"}), 400
+        predicted_genre_input = request.json.get("predicted_genre")
+        choice_genre_input = request.json.get("choice_genre")
+        if not predicted_genre_input or not choice_genre_input:
+            return jsonify({"error": "Missing predicted_genre or choice_genre"}), 400
 
-        # Load data and call the recommendation function
-        filtered_books = content_df[content_df['genre'] == genre]
-        recommendations = recommend_books(user_id, filtered_books)
+        # Recommendation function
+        recommendations = recommend_books(user_ids_df, content_df, predicted_genre_input, unique_book_titles, unique_user_ids, 
+                                          model_weights_path=model_weights_path, top_n=3, choice=choice_genre_input)
         
         return jsonify({"recommendations": recommendations})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@app.route("/predict-books", methods=["POST"])
-def predict_books_endpoint():
-    try:
-        # Ensure a file is uploaded
-        file = request.files.get("file")
-        if not file:
-            return jsonify({"error": "No file uploaded"}), 400
-
-        # Open the file as an image
-        image = Image.open(io.BytesIO(file.read()))
-
-        # Predict book-related features using fitur1_ML
-        predictions = predict_books(image)
         
-        return jsonify(predictions)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
 if __name__ == "__main__":
     app.run(port=8080, debug=True)
