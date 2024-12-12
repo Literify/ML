@@ -40,5 +40,65 @@ This repository contains two machine learning models for predicting book genres 
    - vectorizer_vocab.pkl
    - cosine_similarity.pkl
    - Pretrained model weights (model_genre_classification_weights.h5, model_recomendation_weights.h5).
-  
+
 ## Usage
+
+### 1. Genre Prediction
+Run the script `fitur2_ml.py` for genre prediction:
+```bash
+python fitur2_ml.py --input "path/to/input_text.txt"
+```
+Replace `path/to/input_text.txt` with the path to your text input file. The script will output the predicted genre.
+
+### 2. Recommendation System
+For book recommendations, you can use either of the two scripts:
+
+#### Collaborative Filtering
+```bash
+python fitur2_ml.py --recommend "path/to/user_data.json"
+```
+Replace `path/to/user_data.json` with the path to your user data file. The script will generate personalized recommendations.
+
+#### Content-Based Filtering
+```bash
+python fitur1_ml.py --content "path/to/book_metadata.json"
+```
+Replace `path/to/book_metadata.json` with the path to the book metadata file. The script will recommend books based on content similarity.
+
+---
+
+## File Structure
+```
+.
+├── fitur1_ml.py                # Script for content-based recommendation
+├── fitur2_ml.py                # Script for genre prediction and collaborative filtering
+├── requirements.txt            # Dependencies
+├── model_genre_classification_weights.h5  # Pretrained weights for genre prediction
+├── model_recomendation_weights.h5        # Pretrained weights for recommendation system
+├── sampled_categories.csv      # Sampled book categories
+├── content_df.csv              # Content data for books
+├── user_ids.csv                # User ID data
+├── label_encoder.pkl           # Label encoder for genre prediction
+├── vectorizer_vocab.pkl        # Text vectorizer vocabulary
+├── cosine_similarity.pkl       # Precomputed cosine similarity matrix
+└── README.md                   # Documentation
+```
+
+---
+
+## Contributing
+Contributions are welcome! Please follow these steps:
+1. Fork the repository.
+2. Create a new branch for your feature or bugfix.
+3. Commit your changes with clear and concise messages.
+4. Submit a pull request for review.
+
+---
+
+## Acknowledgments
+- **TensorFlow Recommenders** for the collaborative filtering implementation.
+- **Tesseract OCR** for text extraction.
+- Kaggle datasets for providing valuable book data for training and evaluation.
+
+Feel free to reach out if you encounter any issues or have feature suggestions!
+
