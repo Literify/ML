@@ -65,6 +65,10 @@ python fitur1_ml.py --content "path/to/book_metadata.json"
 ```
 Replace `path/to/book_metadata.json` with the path to the book metadata file. The script will recommend books based on content similarity.
 
+### 3. Testing the Application
+For those who want to try the application directly, a pre-built `.apk` file can be provided. Contact the development team for access to the APK and instructions on how to install it on your Android device.
+
+
 ---
 
 ## File Structure
